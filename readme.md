@@ -1,5 +1,9 @@
 
+### HttpServer
 
-### a good example 
+Implement a simple http server for having a deep understanding of http protocol and network programming
 
-https://www.lagou.com/lgeduarticle/37877.html
+### Function
+
+- support multi-threading connections
+- only support get right now

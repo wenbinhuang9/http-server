@@ -1,5 +1,7 @@
 
-implement a socket server with only one threads. 
+### reference
+
+https://www.lagou.com/lgeduarticle/37877.html
 
 参考这一篇文章： 
 https://www.lagou.com/lgeduarticle/37877.html
