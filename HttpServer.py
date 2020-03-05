@@ -144,7 +144,6 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     # Classify and handle request.
     def do_GET(self):
         try:
-
             # Figure out what exactly is being requested.
             self.full_path = os.getcwd() + self.path
 
