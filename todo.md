@@ -20,3 +20,7 @@ implement http 0.9  get, get to know the http 0.9
 how to implement Connection: keep-alive
 
 support post, but how to support post, what does post mean here
+
+what is cgi here
+
+what it the difference between POST and GET

@@ -1,8 +1,8 @@
 import socket
 from threading import Thread
-## add request handler
-## todo how to implement  keep-alive connection
-## /favicon.ico
+## todo how to implement keep-alive connection
+## todo method not implemented
+## todo support get with argument
 import os
 class HttpRequest:
     def __init__(self):
@@ -39,18 +39,40 @@ def parse_http_request(req_msg):
 
     return httprequest
 
+import subprocess
+
+def is_cgi_file(path):
+    return os.path.isfile(path) and path.endswith('.py')
+
 def do_get(conn):
     from_b_msg = conn.recv(1024)
     str_msg = from_b_msg.decode('utf-8')
     print(str_msg)
     httprequet = parse_http_request(str_msg)
 
-    if os.path.exists(httprequet.path):
-        send_file(conn, httprequet)
+    if is_cgi_file(httprequet.path):
+        serve_cgi(conn, httprequet)
+    elif os.path.exists(httprequet.path):
+        serve_file(conn, httprequet)
     else:
         send_error(conn, httprequet)
 
-def send_file(conn, httprequest):
+def serve_cgi(conn, httprequest):
+    data = subprocess.check_output(["python3", httprequest.path],shell=False)
+    send_content(conn, data)
+    conn.close()
+
+
+
+def send_content(conn, data, header = None):
+    conn.send(b'HTTP/1.1 200 ok \r\n')
+    send_header(conn, "Content-type", "text/html")
+    send_header(conn, "Content-Length", str(len(data)))
+    end_head(conn)
+
+    conn.send(data)
+
+def serve_file(conn, httprequest):
     path = httprequest.path
     data = None
     print(path)
@@ -58,12 +80,7 @@ def send_file(conn, httprequest):
         data = f.read()
     print(data)
 
-    conn.send(b'HTTP/1.1 200 ok \r\n')
-    send_header(conn, "Content-type", "text/html")
-    send_header(conn, "Content-Length", str(len(data)))
-    end_head(conn)
-
-    conn.send(data)
+    send_content(conn, data)
     conn.close()
 
 def send_error(conn, httprequest):
@@ -90,14 +107,19 @@ class BenHttpServer:
         sk = socket.socket()
         sk.bind((ip, port))
         sk.listen(5)
+
         return sk
 
     def serve(self):
-        while True:
-            conn,addr = self.sk.accept()
-            ## todo here implement a thread pool is a more efficient way
-            t=Thread(target=do_get, args=(conn,))
-            t.start()
+        try:
+            while True:
+                conn,addr = self.sk.accept()
+                ## todo here implement a thread pool is a more efficient way
+                t=Thread(target=do_get, args=(conn,))
+                t.start()
+        except:
+            self.sk.close()
+
 
 if __name__ == '__main__':
     server = BenHttpServer('127.0.0.1', 8080)
